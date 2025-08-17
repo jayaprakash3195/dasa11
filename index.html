@@ -7,92 +7,143 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <style>
   :root{
-    --brand:#175397; --green:#17671a; --green2:#40be4a; --ink:#15372a;
-    --paper:#fffef8; --card:#fffdf5; --line:#116504; --muted:#6b6b6b;
+    --bg:#fffef8; --text:#122012; --brand:#175397; --muted:#6b6b6b;
+    --card-bg:#ffffff; --border:#e7e7e7; --hover:#e9f0f9;
+    --accent:#2f76d2; --accent-hover:#195ea8;
+    --secondary-bg:#ecefff; --secondary-border:#15b817; --secondary-text:#063d0b;
+    --green:#17671a; --green2:#40be4a; --line:#116504;
+    --chart-card:#fffdf5; --currentbox:#e8ecf7;
+    --table-head:#f7fafc;
   }
-  body{ font-family:'Latha',Arial,sans-serif; background:var(--paper); margin:0; padding:18px; color:#122012; }
+  [data-theme="dark"]{
+    --bg:#0d1117; --text:#e6edf3; --brand:#7aa2ff; --muted:#9aa7b2;
+    --card-bg:#161b22; --border:#2d333b; --hover:#1f2937;
+    --accent:#3b82f6; --accent-hover:#2563eb;
+    --secondary-bg:#0f1f11; --secondary-border:#18a34a; --secondary-text:#d1fae5;
+    --green:#22c55e; --green2:#4ade80; --line:#198754;
+    --chart-card:#0f1a13; --currentbox:#0b213a;
+    --table-head:#0f172a;
+  }
+
+  body{ font-family:'Latha',Arial,sans-serif; background:var(--bg); color:var(--text); margin:0; padding:18px; }
   .wrap{ max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
-  h2{ margin:6px 0 10px; text-align:center; } .brand{ color:var(--brand); }
-  .card{ background:#fff; border:1.5px solid #e7e7e7; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,.06); padding:16px; }
+  h2{ margin:4px 0 10px; text-align:center; }
+  .brand{ color:var(--brand); }
+  .topbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .theme-btn{ cursor:pointer; border:1px solid var(--border); background:var(--card-bg); color:var(--text);
+    border-radius:999px; padding:6px 12px; font-weight:600; }
+
+  .card{ background:var(--card-bg); border:1.5px solid var(--border); border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,.06); padding:16px; }
   .card h3{ margin:0 0 10px; font-size:1.1rem; }
-  .form-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
-  .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
+  /* Inputs & buttons */
   label{ font-weight:600; }
-  input[type="text"],input[type="date"],input[type="time"],input[type="number"],input[type="datetime-local"]{ padding:8px 10px; border:1px solid #cfd7cf; border-radius:8px; min-width:180px; background:#fff; }
-  .btn{ cursor:pointer; background:#2f76d2; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600; box-shadow:0 1.5px 4px rgba(0,0,0,.08); }
-  .btn:hover{ background:#195ea8; }
-  .btn-secondary{ background:#ecefff; color:#063d0b; border:1.5px solid #15b817; }
-  .btn-secondary:hover{ background:#dbf9e1; }
+  input[type="text"],input[type="date"],input[type="time"],input[type="number"],input[type="datetime-local"]{
+    padding:8px 10px; border:1px solid var(--border); border-radius:8px; min-width:180px; background:var(--card-bg); color:var(--text);
+  }
+  .btn{ cursor:pointer; background:var(--accent); color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:700; }
+  .btn:hover{ background:var(--accent-hover); }
+  .btn-secondary{ background:var(--secondary-bg); color:var(--secondary-text); border:1.5px solid var(--secondary-border); padding:8px 14px; border-radius:8px; font-weight:700; }
+
+  /* Form layout */
+  .form-grid{ display:grid; grid-template-columns:1fr; gap:12px; }
+  .fields-3{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .deggrp{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .deggrp input{ width:70px; }
+  .row-actions{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
+  /* Autocomplete */
   .pos-relative{ position:relative; }
-  #suggestions-box{ position:absolute; top:100%; left:0; right:0; border:1px solid #aaa; background:#fff; max-height:160px; overflow:auto; z-index:1000; display:none; border-radius:8px; }
-  #suggestions-box div{ padding:8px 10px; cursor:pointer; } #suggestions-box div:hover{ background:#eef; }
+  #suggestions-box{ position:absolute; top:100%; left:0; right:0; border:1px solid #aaa; background:var(--card-bg);
+    max-height:160px; overflow:auto; z-index:1000; display:none; border-radius:8px; }
+  #suggestions-box div{ padding:8px 10px; cursor:pointer; } #suggestions-box div:hover{ background:var(--hover); }
+
+  /* Planet buttons */
   .planet-buttons{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-  .planet-btn{ background:#fff; color:#333; border:1px solid #c7c7c7; padding:6px 12px; border-radius:8px; font-weight:600; cursor:pointer; }
+  .planet-btn{ background:var(--card-bg); color:var(--text); border:1px solid var(--border); padding:6px 12px; border-radius:8px; font-weight:700; cursor:pointer; }
   .planet-btn.active,.planet-btn:focus{ background:var(--green); color:#fff; border-color:var(--green); }
+
+  /* Rasi chart */
   .south-chart{
     display:grid; gap:6px; max-width:990px; margin:0 auto;
     grid-template-columns:repeat(4,1fr);
     grid-template-areas:"r10 r11 r12 r01" "r09 photo photo r02" "r08 photo photo r03" "r07 r06 r05 r04";
   }
-  .box{ background:var(--card); border:2px solid var(--line); border-radius:10px; box-shadow:0 2px 5px rgba(52,202,69,.08); padding:8px 6px 10px; display:flex; flex-direction:column; }
+  .box{ background:var(--chart-card); border:2px solid var(--line); border-radius:10px; box-shadow:0 2px 5px rgba(52,202,69,.08); padding:8px 6px 10px; display:flex; flex-direction:column; }
   .rasi-name{ color:#f20909; font-weight:800; text-align:center; margin-bottom:4px; }
   .line{ cursor:pointer; width:100%; border-radius:4px; padding:3px 2px; line-height:1.45; margin-bottom:1.5px; }
-  .line:hover{ background:#e9f0f9; }
-  .highlight-pada-dasa{ background:#17671a !important; color:#fff !important; font-weight:800; }
-  .highlight-pada-puthi{ background:#40be4a !important; color:#fff !important; font-weight:800; }
+  .line:hover{ background:var(--hover); }
+
+  /* Highlights */
+  .highlight-pada-dasa{ background:var(--green) !important; color:#fff !important; font-weight:800; }
+  .highlight-pada-puthi{ background:var(--green2) !important; color:#fff !important; font-weight:800; }
   .highlight-pada-anthara{ background:#b9f4ba !important; color:#21572a !important; font-weight:800; }
   .highlight-pada-1::before{ content:"🟩1 "; } .highlight-pada-2::before{ content:"🟧2 "; } .highlight-pada-3::before{ content:"🟦3 "; } .highlight-pada-4::before{ content:"🟥4 "; }
   .highlight-pada-5::before{ content:"🟩5 "; } .highlight-pada-6::before{ content:"🟧6 "; } .highlight-pada-7::before{ content:"🟦7 "; } .highlight-pada-8::before{ content:"🟥8 "; }
   .highlight-pada-9::before{ content:"🟩9 "; } .highlight-pada-10::before{ content:"🟧10 "; } .highlight-pada-11::before{ content:"🟦11 "; } .highlight-pada-12::before{ content:"🟥12 "; }
   .clicked-pada-1::before{ content:"🟩1🌟"; } .moon-pada-marker{ font-size:1.2em; margin-left:6px; }
-  .currentbox{ background:#e8ecf7; border-radius:10px; box-shadow:0 2px 6px #87aed955; padding:16px 18px; }
-  .section-label{ font-weight:800; color:var(--ink); }
-  .dates{ color:#100f0f; font-size:90%; margin-left:8px; }
-  .pill{ border:1px dashed #b2b2b2; border-radius:999px; padding:4px 10px; font-size:.92rem; background:#fff; }
-  table{ width:100%; border-collapse:collapse; } th,td{ border:1px solid #ddd; padding:8px; text-align:left; } thead th{ background:#f7fafc; }
-  .r01{grid-area:r11}.r02{grid-area:r12}.r03{grid-area:r01}.r04{grid-area:r02}.r05{grid-area:r03}.r06{grid-area:r04}.r07{grid-area:r05}.r08{grid-area:r06}.r09{grid-area:r07}.r10{grid-area:r08}.r11{grid-area:r09}.r12{grid-area:r10}.photo{grid-area:photo}
+
+  /* Current summary & splits */
+  .currentbox{ background:var(--currentbox); border-radius:10px; padding:16px 18px; }
+  .section-label{ font-weight:800; }
+  .dates{ color:var(--muted); font-size:90%; margin-left:8px; }
+  .pill{ border:1px dashed var(--border); border-radius:999px; padding:4px 10px; font-size:.92rem; background:var(--card-bg); }
+
+  /* Table */
+  table{ width:100%; border-collapse:collapse; } th,td{ border:1px solid var(--border); padding:8px; text-align:left; }
+  thead th{ background:var(--table-head); }
+
+  /* Rasi grid mapping */
+  .r01{grid-area:r11}.r02{grid-area:r12}.r03{grid-area:r01}.r04{grid-area:r02}.r05{grid-area:r03}.r06{grid-area:r04}
+  .r07{grid-area:r05}.r08{grid-area:r06}.r09{grid-area:r07}.r10{grid-area:r08}.r11{grid-area:r09}.r12{grid-area:r10}.photo{grid-area:photo}
   @media (max-width:900px){
-    .south-chart{ grid-template-columns:repeat(2,1fr); grid-template-areas:"r01 r02" "r03 r04" "r05 r06" "r07 r08" "r09 r10" "r11 r12"; }
+    .south-chart{ grid-template-columns:repeat(2,1fr); grid-template-areas:"r01 r02" "r03 r04" "r05 r06" "r07 r08" "ர09 r10" "r11 r12"; }
   }
 
-  /* === New 3-column Dasa Tree === */
+  /* 3-column Dasa Tree */
   .tree3-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
   @media (max-width:900px){ .tree3-grid{ grid-template-columns:1fr; } }
-  .tree-col{ border:1px solid #e7e7e7; border-radius:10px; padding:10px; background:#fafcff; }
-  .tree-col h4{ margin:0 0 8px; font-size:1rem; color:#374151; }
+  .tree-col{ border:1px solid var(--border); border-radius:10px; padding:10px; background:var(--card-bg); }
+  .tree-col h4{ margin:0 0 8px; font-size:1rem; }
   .tree-list{ list-style:none; padding:0; margin:0; }
   .tree-item{ display:flex; flex-direction:column; gap:2px; padding:8px; border-radius:8px; cursor:pointer; }
-  .tree-item:hover{ background:#eef5ff; }
-  .tree-item.active{ background:#e9ffe6; outline:1px solid #bce3c0; }
+  .tree-item:hover{ background:var(--hover); }
+  .tree-item.active{ background:#1ef33e; outline:1px solid #034109; }
   .tree-item .title{ font-weight:800; }
-  .tree-item .date{ font-size:.9rem; color:#5b5b5b; }
-
+  .tree-item .date{ font-size:.9rem; color:var(--muted); }
 </style>
 </head>
 <body>
 <div class="wrap" id="app">
-  <h2>🌟 <span class="brand">Jps Astro Research</span> 🌟</h2>
+
+  <div class="topbar">
+    <h2>🌟 <span class="brand">Jps Astro Research</span> 🌟</h2>
+    <button id="themeToggle" class="theme-btn" type="button">🌙 Dark</button>
+  </div>
 
   <!-- API form -->
   <div class="card">
     <h3>API — பிறந்த விவரங்கள்</h3>
     <form id="astroForm" autocomplete="off" class="form-grid">
-      <div class="row">
-        <label for="dob_api">பிறந்த தேதி:</label>
-        <input type="date" id="dob_api" required />
-        <label for="tob_api">பிறந்த நேரம்:</label>
-        <input type="time" id="tob_api" required />
-      </div>
-      <div class="row">
-        <label for="placeInput">பிறந்த இடம்:</label>
-        <div class="pos-relative">
+      <div class="fields-3">
+        <div class="field">
+          <label for="dob_api">பிறந்த தேதி</label>
+          <input type="date" id="dob_api" required />
+        </div>
+        <div class="field">
+          <label for="tob_api">பிறந்த நேரம்</label>
+          <input type="time" id="tob_api" required />
+        </div>
+        <div class="field pos-relative">
+          <label for="placeInput">பிறந்த இடம்</label>
           <input type="text" id="placeInput" placeholder="தொடங்குங்கள்..." required autocomplete="off" />
           <div id="suggestions-box"></div>
         </div>
       </div>
-      <div class="row">
+      <div class="row-actions">
         <button type="submit" class="btn">API மூலம் கணக்கிடு</button>
-        <span id="apiResult" style="margin-left:8px;color:#2563eb;"></span>
+        <span id="apiResult" style="color:var(--brand); font-weight:700;"></span>
       </div>
       <table id="planetsDmsTable" style="margin-top:8px;">
         <thead>
@@ -106,24 +157,37 @@
   <div class="card">
     <h3>கணிப்பு — கைமுறையாக</h3>
     <form onsubmit="event.preventDefault(); run();" class="form-grid">
-      <div class="row">
-        <label>பிறந்த தேதி: <input type="date" id="dob" required></label>
-        <span class="pill">சந்திரன்:</span>
-        <input type="number" id="moon_deg" min="0" max="359" step="1" required style="width:64px;" placeholder="°">°
-        <input type="number" id="moon_min" min="0" max="59"  step="1" required style="width:64px;" placeholder="'">' 
-        <input type="number" id="moon_sec" min="0" max="59"  step="1" required style="width:64px;" placeholder='"'>" 
-        <span class="pill">லக்னம்:</span>
-        <input type="number" id="lagna_deg" min="0" max="359" step="1" style="width:72px;">°
-        <input type="number" id="lagna_min" min="0" max="59" step="1" style="width:72px;">'
-        <input type="number" id="lagna_sec" min="0" max="59" step="1" style="width:72px;">"
+      <div class="fields-3">
+        <div class="field">
+          <label>பிறந்த தேதி</label>
+          <input type="date" id="dob" required>
+        </div>
+        <div class="field">
+          <label>சந்திரன்</label>
+          <div class="deggrp">
+            <input type="number" id="moon_deg" min="0" max="359" step="1" required placeholder="°">°
+            <input type="number" id="moon_min" min="0" max="59"  step="1" required placeholder="'">' 
+            <input type="number" id="moon_sec" min="0" max="59"  step="1" required placeholder='"'>" 
+          </div>
+        </div>
+        <div class="field">
+          <label>லக்னம்</label>
+          <div class="deggrp">
+            <input type="number" id="lagna_deg" min="0" max="359" step="1" placeholder="°">°
+            <input type="number" id="lagna_min" min="0" max="59" step="1" placeholder="'">' 
+            <input type="number" id="lagna_sec" min="0" max="59" step="1" placeholder='"'>" 
+          </div>
+        </div>
       </div>
-      <div class="row">
-        <label>கணிப்புக்கான தேதி: <input type="datetime-local" id="caldate" style="min-width:240px;"></label>
+      <div class="fields-3">
+        <div class="field" style="max-width:340px;">
+          <label>கணிப்புக்கான தேதி</label>
+          <input type="datetime-local" id="caldate">
+        </div>
       </div>
-      <div class="row">
+      <div class="row-actions">
         <button type="submit" class="btn">கணக்கிடு</button>
         <button type="button" id="btn-save-png" class="btn-secondary">Save PNG</button>
-        <button type="button" id="btn-export-csv" class="btn-secondary">Export CSV</button>
       </div>
     </form>
   </div>
@@ -145,21 +209,19 @@
     <h3>தற்போதைய தசை / புக்தி / அந்தரம்</h3>
     <div id="current" class="currentbox"></div>
   </div>
-
-
-  <!-- NEW: 3-column Dasa Tree -->
+  
+  <!-- 3-column Dasa Tree -->
   <div class="card">
     <h3>விம்சோத்தரி — 3 பத்தி பார்வை</h3>
     <div id="dasatree" class="tree3-grid"></div>
   </div>
-
-
-  <!-- Current Splits (percent-only + all four padas with dates) -->
+  <!-- Current Splits -->
   <div class="card">
     <h3>Current Splits</h3>
     <div id="currentSplits"></div>
   </div>
 
+</div>
 
 <script>
 /* ===== Constants ===== */
@@ -195,12 +257,24 @@ let selectedLat=null, selectedLon=null;
 
 /* ===== Utils ===== */
 function debounce(f,d){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>f.apply(this,a),d); }; }
-function decToDMS(dec){ const deg=Math.floor(dec), mF=(dec-deg)*60, min=Math.floor(mF), sec=Math.round((mF-min)*60); return {deg:min<0?deg-1:deg,min,sec}; }
+function decToDMS(dec){ const deg=Math.floor(dec), mF=(dec-deg)*60, min=Math.floor(mF), sec=Math.round((mF-min)*60); return {deg, min, sec}; }
 function addYears(date,years){ let d=new Date(date), y=Math.floor(years), m=(years-y)*12; d.setFullYear(d.getFullYear()+y); d.setMonth(d.getMonth()+Math.floor(m)); d.setDate(d.getDate()+Math.round((m-Math.floor(m))*30)); return d; }
-function formatDate(dt){ return dt.toISOString().slice(0,10); }
+function formatDate(dt){
+  const d = new Date(dt);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth()+1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;  // dd-mm-yyyy
+}
 function cycle9Nakshatras(s){ return Array(9).fill(0).map((_,j)=>(s+j)%27); }
 function clamp01(x){ return Math.max(0,Math.min(1,x)); }
 function pctPeriod(p,now){ if(!p) return 0; return Math.round(clamp01((now-p.start)/(p.end-p.start))*100); }
+
+/* ===== Theme ===== */
+const themeBtn = document.getElementById('themeToggle');
+function setTheme(t){ document.documentElement.setAttribute('data-theme', t); localStorage.setItem('theme', t); themeBtn.textContent = t==='dark' ? '☀️ Light' : '🌙 Dark'; }
+themeBtn.addEventListener('click', ()=>{ const cur=document.documentElement.getAttribute('data-theme')||'light'; setTheme(cur==='dark'?'light':'dark'); });
+(function initTheme(){ setTheme(localStorage.getItem('theme')||'light'); })();
 
 /* ===== Place autocomplete ===== */
 const placeInput=document.getElementById('placeInput');
@@ -330,7 +404,7 @@ function getCurrentPada(period,now){
 /* ===== Rendering ===== */
 function renderSummary(md,mdPada,pt,ptPada,at,atPada){
   const html=`
-    <div class="row" style="flex-direction:column; gap:10px;">
+    <div class="field" style="gap:10px;">
       <div><span class="section-label">தசை:</span> <b>${md?md.lord:'-'}</b>
         <span class="pill">${mdPada?.nak||''} — பாதம் ${mdPada?.pada||'-'}</span>
         <span class="dates">${mdPada?.from?formatDate(mdPada.from):''} - ${mdPada?.to?formatDate(mdPada.to):''}</span>
@@ -347,7 +421,7 @@ function renderSummary(md,mdPada,pt,ptPada,at,atPada){
   document.getElementById('current').innerHTML=html;
 }
 
-/* Current Splits — text only, all 4 padas, only running shows % */
+/* Current Splits — text only, running pada shows %, plus overall % */
 function splitRows(period, now){
   if(!period) return '';
   const total=period.end-period.start;
@@ -369,13 +443,13 @@ function renderCurrentSplits(md,mdPada,pt,ptPada,at,atPada,now){
       <div style="margin:4px 0 6px;">மொத்த முன்னேற்றம்: <b>${mdPct}%</b></div>
       ${splitRows(md,now)}
     </div>
-    <hr style="border:none;border-top:1px dashed #ddd; margin:10px 0;">
+    <hr style="border:none;border-top:1px dashed var(--border); margin:10px 0;">
     <div style="margin:10px 0 12px;">
       <div class="section-label">புக்தி — ${pt?.nak||''} (${pt?.lord||'-'})</div>
       <div style="margin:4px 0 6px;">மொத்த முன்னேற்றம்: <b>${ptPct}%</b></div>
       ${splitRows(pt,now)}
     </div>
-    <hr style="border:none;border-top:1px dashed #ddd; margin:10px 0;">
+    <hr style="border:none;border-top:1px dashed var(--border); margin:10px 0;">
     <div>
       <div class="section-label">அந்தரம் — ${at?.nak||''} (${at?.lord||'-'})</div>
       <div style="margin:4px 0 6px;">மொத்த முன்னேற்றம்: <b>${atPct}%</b></div>
@@ -384,41 +458,16 @@ function renderCurrentSplits(md,mdPada,pt,ptPada,at,atPada,now){
   document.getElementById('currentSplits').innerHTML=html;
 }
 
-/* Pada split panel */
-function currentPadaSplit(period){
-  if(!period) return [];
-  const arr=[]; const total=(period.end-period.start)/(1000*60*60*24*365.2425); let c=new Date(period.start);
-  for(let i=0;i<4;i++){ const to=addYears(c,total/4); arr.push({nak:NAKS[period.nakIdx].name,pada:i+1,lord:NAKS[period.nakIdx].lord,start:new Date(c),end:to}); c=to; }
-  return arr;
-}
-function renderPadaSplitPanel(){
-  let target=null, label="";
-  if(openState.anthara!=null){ target=vimData[openState.dasa].puthis[openState.puthi].antharas[openState.anthara]; label=`<u>அந்தரம் (${target.nak} ${target.lord}):</u>`; }
-  else if(openState.puthi!=null){ target=vimData[openState.dasa].puthis[openState.puthi]; label=`<u>புக்தி (${target.nak} ${target.lord}):</u>`; }
-  else if(openState.dasa!=null){ target=vimData[openState.dasa]; label=`<u>தசை (${target.nak} ${target.lord}):</u>`; }
-  const splits = target? currentPadaSplit(target): [];
-  const inner = target? `
-    <div style="margin:8px 0; padding:10px; border:1.5px solid #cfd7cf; border-radius:10px; background:#f9fbff;">
-      <b>பிரிப்பு - ${target.nak} (${target.lord})</b><br/>
-      ${splits.map(s=>`${s.nak} - பாதம் ${s.pada} : <span class="dates">${formatDate(s.start)} - ${formatDate(s.end)}</span>`).join("<br/>")}
-    </div>` : "<i>ஒரு பகுதியைத் தேர்ந்தெடுக்கவும்…</i>";
-  document.getElementById('padasplit').innerHTML = (label? `<div class="pill">${label}</div>`:"") + inner;
-}
-
 /* ===== 3-column Dasa Tree ===== */
 function renderTree3Cols(){
   const host=document.getElementById('dasatree');
   if(!vimData){ host.innerHTML="<i>முதலில் கணக்கிடுங்கள்…</i>"; return; }
-  const now=new Date(document.getElementById('caldate').value || new Date());
   const cur = vimCurrentPath;
 
-  // Column 1: Dasa list
   const col1 = document.createElement('div'); col1.className='tree-col';
   col1.innerHTML = `<h4>தசை</h4><ul class="tree-list" id="tree-dasa"></ul>`;
-  // Column 2: Puthi
   const col2 = document.createElement('div'); col2.className='tree-col';
   col2.innerHTML = `<h4>புக்தி</h4><ul class="tree-list" id="tree-puthi"></ul>`;
-  // Column 3: Anthara
   const col3 = document.createElement('div'); col3.className='tree-col';
   col3.innerHTML = `<h4>அந்தரம்</h4><ul class="tree-list" id="tree-anthara"></ul>`;
 
@@ -432,7 +481,6 @@ function renderTree3Cols(){
     dasaUL.appendChild(li);
   });
 
-  // Selected dasa's puthis
   const sd = (openState.dasa!=null? openState.dasa : cur.dasa);
   if(sd!=null && sd>=0){
     const md = vimData[sd];
@@ -444,7 +492,6 @@ function renderTree3Cols(){
       pUL.appendChild(li);
     });
 
-    // Selected puthi's antharas
     const sp = (openState.puthi!=null? openState.puthi : cur.puthi);
     if(sp!=null && sp>=0){
       const pt = md.puthis[sp];
@@ -459,7 +506,7 @@ function renderTree3Cols(){
   }
 }
 
-/* ===== Planet labels on chart ===== */
+/* ===== Planet labels on chart & buttons ===== */
 function placePlanetsOnChart(planets){
   if(!planets||!padaDomList.length) return;
   for(let i=1;i<=108;i++){ const cell=padaDomList[i]; if(!cell) continue; [...cell.querySelectorAll("[class^='planet-']")].forEach(el=>el.remove()); }
@@ -496,17 +543,9 @@ function renderAll(nowParam){
   const mdPada=getCurrentPada(md,now), ptPada=getCurrentPada(pt,now), atPada=getCurrentPada(at,now);
   showCurrentDasaPadaHighlight();
 
-  // Current (no %)
   renderSummary(md,mdPada,pt,ptPada,at,atPada);
-
-  // Current Splits (percent only where running)
   renderCurrentSplits(md,mdPada,pt,ptPada,at,atPada,now);
-
-  // Tree 3 columns
   renderTree3Cols();
-
-  // Pada split
-  renderPadaSplitPanel();
 }
 
 /* ===== RUN ===== */
@@ -528,11 +567,8 @@ function run(){
   openState={dasa:vimCurrentPath.dasa, puthi:vimCurrentPath.puthi, anthara:vimCurrentPath.anth};
   renderAll(now);
 
-  // Range-3 from Lagna (auto)
   const Ld=parseInt(lagna_deg.value)||0, Lm=parseInt(lagna_min.value)||0, Ls=parseInt(lagna_sec.value)||0;
   const lagnaDeg= Ld + Lm/60 + Ls/3600; highlightPadaRange3(getLagnaPadaIndex(lagnaDeg));
-
-  // Moon marker
   placeMoonSymbolToPada( getMoonPadaIndex(mdeg,mmin,msec) );
 }
 
@@ -558,7 +594,6 @@ document.getElementById('astroForm').addEventListener('submit', async (e)=>{
     window.planetDegrees={}; Object.keys(planets).forEach(k=>{ if(typeof planets[k].fullDegree==='number') window.planetDegrees[k]=planets[k].fullDegree; });
     ensurePlanetButtons();
 
-    // Table
     const tb=document.querySelector('#planetsDmsTable tbody'); tb.innerHTML='';
     const order=['Ascendant','Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Rahu','Ketu'];
     const rasiList=["மேஷம்","ரிஷபம்","மிதுனம்","கடகம்","சிம்மம்","கன்னி","துலாம்","விருச்சிகம்","தனுசு","மகரம்","கும்பம்","மீனம்"];
@@ -580,25 +615,10 @@ document.getElementById('astroForm').addEventListener('submit', async (e)=>{
   }catch(err){ apiResult.textContent='Error: '+err.message; }
 });
 
-/* ===== CSV & PNG ===== */
-document.getElementById('btn-export-csv').addEventListener('click', ()=>{
-  if(!vimData){ alert('முதலில் கணக்கிடுங்கள்.'); return; }
-  const rows=[['Level','Lord','Nakshatra','Start','End']];
-  vimData.forEach(md=>{
-    rows.push(['Dasa',md.lord,md.nak,formatDate(md.start),formatDate(md.end)]);
-    md.puthis.forEach(pt=>{
-      rows.push(['Puthi',`${md.lord} → ${pt.lord}`,pt.nak,formatDate(pt.start),formatDate(pt.end)]);
-      pt.antharas.forEach(at=>{
-        rows.push(['Anthara',`${md.lord} → ${pt.lord} → ${at.lord}`,at.nak,formatDate(at.start),formatDate(at.end)]);
-      });
-    });
-  });
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='vimsottari_periods.csv'; document.body.appendChild(a); a.click(); a.remove();
-});
+/* ===== PNG ===== */
 document.getElementById('btn-save-png').addEventListener('click', async ()=>{
-  const app=document.getElementById('app'); const canvas=await html2canvas(app,{useCORS:true, backgroundColor:'#ffffff', scale:2});
+  const app=document.getElementById('app');
+  const canvas=await html2canvas(app,{useCORS:true, backgroundColor:null, scale:2});
   const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download='jps-astro.png'; a.click();
 });
 
